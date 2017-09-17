@@ -1,6 +1,22 @@
 import React, { Component } from 'react'
 import { Field, reduxForm, SubmisssionError} from 'redux-form'
 
+async function submitToServer(data)  {
+  try {
+    let response = await fetch('http://localhost:3000/register',{
+      method:'POST',
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    let responseJson = await response.json();
+    return responseJson;
+   } catch(error) {
+      console.log(error);
+
+   }
+}
 
  const  submit = ({firstName='', lastName='', email=''}) => {
        let error = {};
@@ -24,23 +40,24 @@ import { Field, reduxForm, SubmisssionError} from 'redux-form'
           isError = true;
        }
 
-       if(isError){
+       if(isError) {
         throw new SubmisssionError(error)
        }
        else {
-        //submit form to server
+        submitToServer({firstName, lastName, email})
+        .then(data => console.log(data));
        }
       }
       // outside your render() method
-const renderField = ({text, label, input, meta: {touched, error}}) => (
+const renderField = ({type, label, input, meta: {touched, error}}) => (
     <div className="input-row">
       <label>{label}</label>
-      <input {...input} type={text}/>
+      <input {...input} type={type}/>
       {touched && error && 
        <span className="error">{error}</span>}
     </div>
   )
- 
+  
 const ContactFormFunc = ({handleSubmit}) => (
       <form onSubmit={handleSubmit(submit)}>
         <div>
